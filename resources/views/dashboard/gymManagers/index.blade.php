@@ -13,7 +13,7 @@
 @endsection
 
 @section('add_endpoint')
-    "{{ route('dashboard.gym_managers.create') }}"
+    "{{ route('dashboard.gym_managers.store') }}"
 @endsection
 
 @section('update_endpoint')
@@ -24,6 +24,10 @@
     "{{ route('dashboard.gym_managers.destroy', '') }}"
 @endsection
 
+@section('toggle_ban_endpoint')
+    "{{ route('dashboard.gym_managers.ban', '') }}"
+@endsection
+
 @section('table_columns')
     {data: 'DT_RowIndex', name: 'DT_RowIndex'},
     {data: 'name', name: 'name'},
@@ -32,5 +36,7 @@
     {data: 'gender', name: 'gender'},
     {data: 'birth_date', name: 'birth_date'},
     {data: 'gym', name: 'gym'},
-    {data: 'city', name: 'city'},
+    @can('show_city_data')
+        {data: 'city', name: 'city'},
+    @endcan
 @endsection

@@ -50,7 +50,7 @@
                             </select>
                         </div>
                         <div class="form-group text-center">
-                            <img id="imgPreview" class="img-fluid" style="max-height: 15rem" src="{{ url(URL::to('/images') . '/'. Auth::user()->avatar) }}" alt="">
+                            <img id="imgPreview" class="img-fluid" style="max-height: 15rem" src="{{ Auth::user()->avatar }}" alt="">
                         </div>
                         <div class="form-group">
                             <label for="avatar">File input</label>
@@ -119,5 +119,10 @@
             maxDate: "today",
         });
 
+    </script>
+    <script>
+        $('.custom-file input').change(function (e) {
+            e.target.files.length && $(this).next('.custom-file-label').html(e.target.files[0].name);
+        });
     </script>
 @endsection

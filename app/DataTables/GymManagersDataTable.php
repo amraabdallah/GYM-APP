@@ -2,12 +2,9 @@
 
 namespace App\DataTables;
 
-use App\Models\GymsManagers;
+use App\Models\GymManager;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\Html\Button;
 use Yajra\DataTables\Html\Column;
-use Yajra\DataTables\Html\Editor\Editor;
-use Yajra\DataTables\Html\Editor\Fields;
 use Yajra\DataTables\Services\DataTable;
 
 class GymManagersDataTable extends DataTable
@@ -28,10 +25,10 @@ class GymManagersDataTable extends DataTable
     /**
      * Get query source of dataTable.
      *
-     * @param \App\Models\GymsManagers $model
+     * @param \App\Models\GymManager $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(GymsManagers $model)
+    public function query(GymManager $model)
     {
         return $model->newQuery();
     }
@@ -47,15 +44,7 @@ class GymManagersDataTable extends DataTable
                     ->setTableId('datatable')
                     ->columns($this->getColumns())
                     ->minifiedAjax()
-                    ->dom('Bfrtip')
-                    ->orderBy(1)
-                    ->buttons(
-                        Button::make('create'),
-                        Button::make('export'),
-                        Button::make('print'),
-                        Button::make('reset'),
-                        Button::make('reload')
-                    );
+                    ->dom('Bfrtip');
     }
 
     /**

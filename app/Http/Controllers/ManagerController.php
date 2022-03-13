@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Manager;
+use App\Http\Requests\UpdateBasicInformationRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -17,7 +17,7 @@ class ManagerController extends Controller
     public function index()
     {
         $user = Auth::user();
-        return view('dashboard.accountSettings.index',compact('user'));
+        return view('dashboard.accountSettings.index', compact('user'));
     }
 
     public function updatePassword(Request $request)
@@ -30,27 +30,20 @@ class ManagerController extends Controller
         ]);
         return redirect()->route('dashboard.account.index')->with('message', 'Your Password has been updated!');
     }
-    public function updateBasicInformation(Request $request)
+
+    public function updateBasicInformation(UpdateBasicInformationRequest $request)
     {
-        $request->validate([
-            'name' => 'required|min:3|max:100',
-            'email' => 'required|unique:managers|email:rfc,dns|max:100',
-            'gender' => 'required|in:male,female',
-            'birth_date' => 'date_format:Y-m-d|before:today',
-            'avatar' => 'mimes:jpg,jpeg,bmp,png'
-        ]);
         Auth::user()->update([
-              "name" => $request->name,
-              "email" => $request->email,
-              "birth_date" => $request->birth_date,
-              "gender" => $request->gender,
+            "name" => $request->name,
+            "email" => $request->email,
+            "birth_date" => $request->birth_date,
+            "gender" => $request->gender,
         ]);
-        if($request->file('avatar') != null){
+        if ($request->file('avatar') != null) {
             Auth::user()->update([
-                "avatar" => $request->file('avatar')->store('images/','public')
+                "avatar" => $request->file('avatar')->store('images', 'public')
             ]);
         }
         return redirect()->route('dashboard.account.index')->with('message', 'Your Information has been updated!');
     }
-
 }

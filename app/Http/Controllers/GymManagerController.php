@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\DataTables\GymManagersDataTable;
-use App\Http\Resources\CityGymCoachesResource;
 use App\Http\Resources\CityGymResource;
 use App\Http\Resources\GymManagersResource;
 use App\Models\City;
+use App\Models\GymManager;
 use App\Models\Manager;
 use App\Http\Requests\StoreManagerRequest;
-use App\Http\Requests\UpdateManagerRequest;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
 class GymManagerController extends Controller
@@ -22,8 +22,7 @@ class GymManagerController extends Controller
     public function index(GymManagersDataTable $dataTable)
     {
         if (request()->ajax()) {
-            $data = GymManagersResource::collection(Manager::role('gym_manager')->get());
-            return DataTables::of($data)
+            return DataTables::of(GymManagerController::getData())
                 ->addIndexColumn()
                 ->rawColumns(['action'])
                 ->make(true);
@@ -43,6 +42,7 @@ class GymManagerController extends Controller
         return [
             'formLable' => 'Gym Manager',
             'fields' => [
+                // ----- * ----- Add form ----- * -----
                 [
                     'label' => 'Manager',
                     'name' => 'manager_id',
@@ -50,7 +50,8 @@ class GymManagerController extends Controller
                     'valueKey' => 'id',
                     'text' => 'name',
                     'compare' => 'manager_name',
-                    'options' => $managers
+                    'options' => $managers,
+                    'addOnly' => true
                 ],
                 [
                     'type' => 'nestedSelect',
@@ -69,7 +70,55 @@ class GymManagerController extends Controller
                             'inputName' => 'gym_id'
                         ],
                     ],
-                ]
+                    'addOnly' => true
+                ],
+                // ----- * ----- Edit form ----- * -----
+                [
+                    'type' => 'text',
+                    'label' => 'Manager Name',
+                    'name' => 'name',
+                    'valueKey' => 'name',
+                    'editOnly' => true
+                ],
+                [
+                    'type' => 'email',
+                    'label' => 'Email',
+                    'name' => 'email',
+                    'valueKey' => 'email',
+                    'editOnly' => true
+                ],
+                [
+                    'type' => 'text',
+                    'label' => 'National Id',
+                    'name' => 'national_id',
+                    'valueKey' => 'national_id',
+                    'editOnly' => true
+                ],
+                [
+                    'type' => 'radio',
+                    'label' => 'Gender',
+                    'name' => 'gender',
+                    'valueKey' => 'gender',
+                    'options' => [
+                        ['value' => 'male', 'text' => 'Male'],
+                        ['value' => 'female', 'text' => 'Female'],
+                    ],
+                    'editOnly' => true
+                ],
+                [
+                    'type' => 'date',
+                    'label' => 'Birth Date',
+                    'name' => 'birth_date',
+                    'valueKey' => 'birth_date',
+                    'editOnly' => true
+                ],
+                [
+                    'type' => 'file',
+                    'label' => 'Avatar Image',
+                    'name' => 'avatar',
+                    'valueKey' => 'avatar',
+                    'editOnly' => true
+                ],
             ]
         ];
     }
@@ -78,50 +127,23 @@ class GymManagerController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \App\Http\Requests\StoreManagerRequest  $request
-     * @return \Illuminate\Http\Response
+     * @return array
      */
     public function store(StoreManagerRequest $request)
     {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Manager  $manager
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Manager $manager)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Manager  $manager
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Manager $manager)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \App\Http\Requests\UpdateManagerRequest  $request
-     * @param  \App\Models\Manager  $manager
-     * @return \Illuminate\Http\Response
-     */
-    public function update(UpdateManagerRequest $request, Manager $manager)
-    {
-        //
+        $manager  = Manager::find($request->validated()['manager_id']);
+        $manager->setRole('gym_manager');
+        GymManager::create($request->validated());
+        $newManagerData = Datatables::of(GymManagersResource::collection([$manager]))->make(true);
+        return [
+            'result' => true,
+            'userMessage' => "<b>$manager->name</b> Has been created successfuly",
+            'newRowData' => $newManagerData
+        ];
     }
 
     /**
      * Remove the specified resource from storage.
-     *
      * @param  \App\Models\Manager  $manager
      * @return array
      */
@@ -136,4 +158,32 @@ class GymManagerController extends Controller
         ];
     }
 
+    public function getData()
+    {
+        if (Auth::user()->hasRole('admin')) {
+            return GymManagersResource::collection(Manager::role('gym_manager')->get());
+        } else {
+            return GymManagersResource::collection(Auth::user()->city->gyms()->with('managers')->get()->pluck('managers')->flatten());
+        }
+    }
+
+    public function ban($id): array
+    {
+        $manager = Manager::find($id);
+        if ($manager->isbanned()) {
+            $manager->unban();
+            return [
+                'result' => true,
+                'isBanned' => false,
+                'userMessage' => "<b>$manager->name</b> unbanned successfuly",
+            ];
+        } else {
+            $manager->ban();
+            return [
+                'result' => true,
+                'isBanned' => true,
+                'userMessage' => "<b>$manager->name</b> banned successfuly",
+            ];
+        }
+    }
 }

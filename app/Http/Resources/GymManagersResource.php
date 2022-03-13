@@ -4,7 +4,6 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Auth;
-use Yajra\DataTables\Html\Column;
 
 class GymManagersResource extends JsonResource
 {
@@ -25,7 +24,7 @@ class GymManagersResource extends JsonResource
             'gender' => $this->gender,
             'birth_date' => $this->birth_date,
             'avatar' => $this->avatar,
-            'is_banned' => $this->is_banned,
+            'is_banned' => $this->banned_at ? true : false,
             'gym' => $this->gym->name,
         ];
         if (Auth::user()->can('show_city_data')) {

@@ -8,10 +8,10 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
-class GymsManagers extends Model
+class GymManager extends Model
 {
     use HasApiTokens, HasFactory, Notifiable , HasRoles;
-
+    protected  $guarded = [];
     public $timestamps = false;
 
     public function manager() {

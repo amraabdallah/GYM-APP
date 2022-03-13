@@ -37,43 +37,13 @@ Route::get('/', function () {
     return redirect()->route('dashboard.home.index');
 });
 
-//=======for testing only====
-Route::get('welcome-member', function () {
-
-    $member = User::where('id',15)->first();
-    return new WelcomeMember($member);
-});
-
-Route::get('verify-email', function () {
-
-    $member = User::where('id',15)->first();
-    $options = array(
-        'verify_url' => 'http://gotohere.com',
-    );
-    return new VerifyEmail($member, $options);
-});
-
-Route::get('forgot-password', function () {
-
-    $member = User::where('id',15)->first();
-    $options = array(
-        'reset_link' => 'http://gotohere.com',
-    );
-    return new ForgotPassword($member, $options);
-});
-
-// Route::get('we-miss-you', function () {
-
-//     $member = User::where('id',15)->first();
-//     return new WeMissYou($member);
-// });
-//=======
-
 Route::prefix('dashboard')->middleware('auth')->name('dashboard.')->group(function () {
 
     Route::get('/', [HomeController::class, 'index'])->middleware('permission:purchases')->name('home.index');;
-    Route::get('/home/charts/male-female-attendance', [HomeController::class, 'maleFemaleAttendanceData'])->middleware('permission:purchases')->name('carts.male-female-attendance');;
-    Route::get('/home/charts/revenue/{year}', [HomeController::class, 'revenuePerMonth'])->middleware('permission:purchases')->name('carts.revenue');;
+    Route::get('/home/charts/male-female-attendance', [HomeController::class, 'maleFemaleAttendanceData'])->middleware('permission:purchases')->name('charts.male-female-attendance');;
+    Route::get('/home/charts/revenue/{year}', [HomeController::class, 'revenuePerMonth'])->middleware('permission:purchases')->name('charts.revenue');;
+    Route::get('/home/charts/top-users', [HomeController::class, 'topUsers'])->middleware('permission:purchases')->name('charts.top-users');;
+    Route::get('/home/charts/top-cities', [HomeController::class, 'topCities'])->middleware('permission:purchases')->name('charts.top-cities');;
 
     Route::get('revenue', [PurchaseController::class, 'index'])->middleware('permission:purchases')->name('revenue');
 
@@ -84,6 +54,8 @@ Route::prefix('dashboard')->middleware('auth')->name('dashboard.')->group(functi
     Route::resource('city_managers', CityManagerController::class)->middleware('permission:city_managers');
 
     Route::resource('gym_managers', GymManagerController::class)->middleware('permission:gym_managers');
+    Route::patch('/gym_managers/ban/{gymManager}', [GymManagerController::class, 'ban'])->name('gym_managers.ban')->middleware('permission:gym_managers');
+
 
     Route::resource('general_managers', GeneralManagerController::class)->middleware('permission:general_managers');
 
@@ -109,4 +81,4 @@ Route::prefix('dashboard')->middleware('auth')->name('dashboard.')->group(functi
 
 });
 
-Auth::routes();
+Auth::routes(['register' => false]);
